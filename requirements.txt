@@ -2,6 +2,7 @@ fastapi
 uvicorn
 moviepy==1.0.3
 Pillow
-yt-dlp
+yt-dlp[default]
+yt-dlp-ejs
 brotli
 websockets
