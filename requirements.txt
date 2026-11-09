@@ -1,6 +1,7 @@
 fastapi
 uvicorn
-moviepy
+moviepy==1.0.3
+Pillow
 yt-dlp
 brotli
 websockets
