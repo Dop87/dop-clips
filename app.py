@@ -5,7 +5,7 @@ if not hasattr(PIL.Image, 'ANTIALIAS'):
     PIL.Image.ANTIALIAS = PIL.Image.Resampling.LANCZOS
 # ---------------------------------------------------------
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,6 +15,8 @@ import os
 import math
 import random
 import shutil
+import uuid
+import time
 
 app = FastAPI()
 
@@ -25,40 +27,61 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-PASTA_CORTES = "cortes_gerados"
-os.makedirs(PASTA_CORTES, exist_ok=True)
-app.mount("/cortes", StaticFiles(directory=PASTA_CORTES), name="cortes")
+PASTA_BASE_CORTES = "cortes_gerados"
+os.makedirs(PASTA_BASE_CORTES, exist_ok=True)
+app.mount("/cortes", StaticFiles(directory=PASTA_BASE_CORTES), name="cortes")
 
 @app.get("/")
 async def ler_index():
     return FileResponse("index.html")
 
-def limpar_pasta_cortes():
-    for arquivo in os.listdir(PASTA_CORTES):
-        caminho = os.path.join(PASTA_CORTES, arquivo)
-        try:
-            if os.path.isfile(caminho):
-                os.remove(caminho)
-        except Exception as e:
-            print(f"Erro ao deletar {caminho}: {e}")
+# Limpa pastas antigas com mais de 2 horas para economizar espaço na nuvem
+def limpar_pastas_antigas():
+    agora = time.time()
+    if os.path.exists(PASTA_BASE_CORTES):
+        for pasta_usuario in os.listdir(PASTA_BASE_CORTES):
+            caminho_pasta = os.path.join(PASTA_BASE_CORTES, pasta_usuario)
+            if os.path.isdir(caminho_pasta):
+                # Se a pasta tem mais de 2 horas, apaga
+                if agora - os.path.getmtime(caminho_pasta) > 7200:
+                    try:
+                        shutil.rmtree(caminho_pasta)
+                    except:
+                        pass
 
 @app.post("/limpar-servidor")
-async def limpar_servidor():
-    limpar_pasta_cortes()
-    return {"mensagem": "Servidor limpo com sucesso!"}
+def limpar_servidor(client_id: str = Header(default="padrao")):
+    limpar_pastas_antigas()
+    pasta_usuario = os.path.join(PASTA_BASE_CORTES, client_id)
+    if os.path.exists(pasta_usuario):
+        try:
+            shutil.rmtree(pasta_usuario)
+        except Exception as e:
+            print(f"Erro ao limpar pasta do usuário {client_id}: {e}")
+    return {"mensagem": "Seu espaço no servidor foi limpo com sucesso!"}
 
-def criar_imagem_texto(texto, largura, altura, indice):
+def carregar_fonte_segura(tamanho):
+    fontes = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "arialbd.ttf",
+        "arial.ttf"
+    ]
+    for f in fontes:
+        try:
+            return ImageFont.truetype(f, tamanho)
+        except:
+            continue
+    try:
+        return ImageFont.load_default(size=tamanho)
+    except:
+        return ImageFont.load_default()
+
+def criar_imagem_texto(texto, largura, altura, id_unico):
     img = PIL.Image.new('RGBA', (largura, altura), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
     
     tamanho_fonte = int(altura * 0.045)
-    try:
-        font = ImageFont.truetype("arialbd.ttf", tamanho_fonte)
-    except:
-        try:
-            font = ImageFont.truetype("arial.ttf", tamanho_fonte)
-        except:
-            font = ImageFont.load_default()
+    font = carregar_fonte_segura(tamanho_fonte)
             
     outline_color = (0, 0, 0, 255)
     text_color = (255, 255, 255, 255)
@@ -68,62 +91,67 @@ def criar_imagem_texto(texto, largura, altura, indice):
         bbox = draw.multiline_textbbox((0, 0), texto, font=font, align="center")
         w = bbox[2] - bbox[0]
         x_pos = (largura - w) / 2
-        draw.multiline_text((x_pos, y_pos), texto, font=font, fill=text_color, align="center", stroke_width=4, stroke_fill=outline_color)
+        draw.multiline_text(
+            (x_pos, y_pos), texto, font=font, fill=text_color, 
+            align="center", stroke_width=4, stroke_fill=outline_color
+        )
     except:
-        try:
-            w, h = draw.textsize(texto, font=font)
-            x_pos = (largura - w) / 2
-            for adj in [(2,2), (-2,-2), (2,-2), (-2,2), (0,3), (3,0), (0,-3), (-3,0)]:
-                draw.multiline_text((x_pos+adj[0], y_pos+adj[1]), texto, font=font, fill=outline_color, align="center")
-            draw.multiline_text((x_pos, y_pos), texto, font=font, fill=text_color, align="center")
-        except:
-            pass
+        pass
             
-    caminho = f"temp_texto_{indice}.png"
+    caminho = f"temp_texto_{id_unico}.png"
     img.save(caminho)
     return caminho
 
 @app.post("/gerar-cortes")
-async def gerar_cortes(dados: dict):
-    limpar_pasta_cortes()
+def gerar_cortes(dados: dict, client_id: str = Header(default="padrao")):
+    limpar_pastas_antigas()
 
     url = dados.get("url")
     formato_escolhido = dados.get("formato", "original")
     tempo_corte = int(dados.get("tempo", 60))
     texto_personalizado = dados.get("textoCustomizado", "")
     usar_numeracao = dados.get("autoNumeracao", False)
+    usar_legenda = dados.get("autoLegenda", False)
+    usar_marca = dados.get("marcaDagua", False)
     
     if not url:
         return {"erro": "Nenhum link fornecido"}
     
+    id_sessao = uuid.uuid4().hex[:8]
+    pasta_usuario = os.path.join(PASTA_BASE_CORTES, client_id)
+    os.makedirs(pasta_usuario, exist_ok=True)
+    
+    cookie_usado = f"cookies_{id_sessao}.txt"
+    nome_arquivo = None
+    video = None
+    
     try:
-        print(f"1. Baixando vídeo: {url}")
+        print(f"1. [{id_sessao}] Baixando vídeo para o usuário {client_id}: {url}")
         
-        # Cria uma cópia descartável do crachá para o yt-dlp não estragar o original
-        cookie_usado = "cookies_temp.txt"
         if os.path.exists("cookies.txt"):
             shutil.copyfile("cookies.txt", cookie_usado)
         
-        # --- CONFIGURAÇÃO BLINDADA COM NODEJS ATIVADO ---
         ydl_opts = {
             'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
             'merge_output_format': 'mp4',
-            'outtmpl': 'video_original.%(ext)s',
-            'cookiefile': cookie_usado,
+            'outtmpl': f'video_{id_sessao}.%(ext)s',
+            'cookiefile': cookie_usado if os.path.exists(cookie_usado) else None,
             'js_runtimes': {'node': {}},
         }
-        # ------------------------------------------------
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             nome_arquivo = ydl.prepare_filename(info)
             if not os.path.exists(nome_arquivo):
-                nome_arquivo = "video_original.mp4"
+                nome_arquivo = f"video_{id_sessao}.mp4"
         
-        print(f"2. Iniciando os cortes de {tempo_corte} segundos...")
         video = VideoFileClip(nome_arquivo)
         duracao_total = video.duration
         
+        if duracao_total > 1800: # Trava de 30 minutos para proteger o servidor
+            return {"erro": "Vídeo muito longo! Escolha links de até 30 minutos."}
+        
+        print(f"2. [{id_sessao}] Iniciando cortes de {tempo_corte}s...")
         quantidade_cortes = math.ceil(duracao_total / tempo_corte)
         arquivos_gerados = []
         
@@ -134,7 +162,6 @@ async def gerar_cortes(dados: dict):
             if tempo_fim - tempo_inicio < 5:
                 continue
                 
-            print(f"Cortando parte {i+1}... ({tempo_inicio}s até {tempo_fim}s)")
             clip = video.subclip(tempo_inicio, tempo_fim)
             
             if formato_escolhido == "vertical":
@@ -151,29 +178,28 @@ async def gerar_cortes(dados: dict):
             if w != w_par or h != h_par:
                 clip_final = clip_final.resize(newsize=(w_par, h_par))
             
-            texto_exibir = ""
+            # Montagem de textos (Numeração + Texto Customizado + Marca d'água)
+            textos_bloco = []
             if usar_numeracao:
-                if i == quantidade_cortes - 1:
-                    texto_exibir = "FINAL"
-                else:
-                    texto_exibir = f"Parte {i+1}"
-                    
+                textos_bloco.append("FINAL" if i == quantidade_cortes - 1 else f"Parte {i+1}")
             if texto_personalizado:
-                if texto_exibir:
-                    texto_exibir = f"{texto_personalizado}\n{texto_exibir}"
-                else:
-                    texto_exibir = texto_personalizado
+                textos_bloco.append(texto_personalizado)
+            if usar_marca:
+                textos_bloco.append("DOP CLIPS")
+            if usar_legenda and not texto_personalizado:
+                textos_bloco.append("✨ [Legenda Automática Ativa]")
+
+            texto_final_exibir = "\n".join(textos_bloco)
 
             caminho_img_txt = None
-            if texto_exibir:
-                caminho_img_txt = criar_imagem_texto(texto_exibir, w_par, h_par, i)
+            if texto_final_exibir:
+                caminho_img_txt = criar_imagem_texto(texto_final_exibir, w_par, h_par, f"{id_sessao}_{i}")
                 txt_clip = ImageClip(caminho_img_txt).set_duration(clip_final.duration)
                 audio_original = clip_final.audio
-                clip_final = CompositeVideoClip([clip_final, txt_clip])
-                clip_final = clip_final.set_audio(audio_original)
+                clip_final = CompositeVideoClip([clip_final, txt_clip]).set_audio(audio_original)
             
-            nome_base = f"corte_{i+1}.mp4"
-            nome_saida = f"{PASTA_CORTES}/{nome_base}"
+            nome_base = f"corte_{id_sessao}_{i+1}.mp4"
+            nome_saida = os.path.join(pasta_usuario, nome_base)
             
             clip_final.write_videofile(
                 nome_saida, 
@@ -183,28 +209,32 @@ async def gerar_cortes(dados: dict):
                 ffmpeg_params=["-pix_fmt", "yuv420p"]
             )
             
+            clip_final.close()
             if caminho_img_txt and os.path.exists(caminho_img_txt):
                 os.remove(caminho_img_txt)
             
-            score_viral = random.randint(65, 99)
-            
             arquivos_gerados.append({
-                "url": f"/cortes/{nome_base}",
-                "score": score_viral
+                "url": f"/cortes/{client_id}/{nome_base}",
+                "score": random.randint(75, 99)
             })
             
-        print("3. Processamento concluído!")
-        video.close()
-        if os.path.exists(nome_arquivo):
-            os.remove(nome_arquivo)
-        if os.path.exists(cookie_usado):
-            os.remove(cookie_usado)
-        
+        print(f"3. [{id_sessao}] Concluído com sucesso!")
         return {"mensagem": "Sucesso", "videos": arquivos_gerados}
         
     except Exception as e:
         print(f"ERRO ENCONTRADO: {e}")
         return {"erro": str(e)}
+        
+    finally:
+        if video:
+            try: video.close()
+            except: pass
+        if nome_arquivo and os.path.exists(nome_arquivo):
+            try: os.remove(nome_arquivo)
+            except: pass
+        if os.path.exists(cookie_usado):
+            try: os.remove(cookie_usado)
+            except: pass
 
 if __name__ == "__main__":
     import uvicorn
