@@ -8,6 +8,7 @@ if not hasattr(PIL.Image, 'ANTIALIAS'):
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse # <--- ADICIONADO PARA MOSTRAR O SITE
 import yt_dlp
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 import os
@@ -26,6 +27,12 @@ app.add_middleware(
 PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 app.mount("/cortes", StaticFiles(directory=PASTA_CORTES), name="cortes")
+
+# --- ROTA PRINCIPAL: CARREGAR A PÁGINA INICIAL ---
+@app.get("/")
+async def ler_index():
+    return FileResponse("index.html")
+# -------------------------------------------------
 
 def limpar_pasta_cortes():
     for arquivo in os.listdir(PASTA_CORTES):
@@ -171,8 +178,9 @@ async def gerar_cortes(dados: dict):
             
             score_viral = random.randint(65, 99)
             
+            # --- AJUSTADO PARA A NUVEM (Sem 127.0.0.1) ---
             arquivos_gerados.append({
-                "url": f"http://127.0.0.1:8000/cortes/{nome_base}",
+                "url": f"/cortes/{nome_base}",
                 "score": score_viral
             })
             

@@ -76,17 +76,14 @@
 
         .app-container { flex: 1; background: #0a0a10; padding: 40px; border-radius: 16px; border: 1px solid rgba(185, 0, 255, 0.15); box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         
-        /* Nova área de Inputs organizados */
         .input-row { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
         @media(min-width: 768px) { .input-row { grid-template-columns: 2fr 1.5fr 1fr; } }
         
-        /* Campo do texto personalizado que ocupa a linha toda */
         .input-row-full { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 25px; }
 
         input[type="url"], input[type="text"], select { padding: 18px 20px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); background: #11111a; color: #fff; outline: none; font-size: 0.95rem; transition: 0.3s; font-weight: bold; appearance: none; }
         input[type="url"]:focus, input[type="text"]:focus, select:focus { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.1); background: #161622; }
         
-        /* Toggles com a nova função de Auto Numeração */
         .toggles { display: flex; justify-content: center; gap: 30px; margin: 30px 0; background: #07070a; padding: 25px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.02); flex-wrap: wrap; }
         .toggles label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 900; color: #aaa; font-size: 0.85rem; text-transform: uppercase; transition: 0.3s; }
         .toggles label:hover { color: #fff; }
@@ -167,7 +164,7 @@
         </div>
     </div>
 
-    <!-- ÁREA DE RECORTE COM O NOVO CAMPO DE TEXTO -->
+    <!-- ÁREA DE RECORTE -->
     <div id="app" class="page" style="align-items: center;">
         <div class="app-layout">
             
@@ -193,7 +190,6 @@
                     </select>
                 </div>
                 
-                <!-- Novo Bloco de Texto Personalizado -->
                 <div class="input-row-full">
                     <input type="text" id="inputTexto" placeholder="Escreva algo no vídeo (Ex: Siga para mais clipes!) - Opcional">
                 </div>
@@ -321,7 +317,8 @@
             document.getElementById('statusTexto').style.color = "#00d2ff";
 
             try {
-                const resposta = await fetch("http://127.0.0.1:8000/gerar-cortes", {
+                // --- AJUSTADO PARA A NUVEM (Comunicação Relativa) ---
+                const resposta = await fetch("/gerar-cortes", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
@@ -359,7 +356,7 @@
                     document.getElementById('statusTexto').style.color = "#ff3333";
                 }
             } catch (erro) {
-                document.getElementById('statusTexto').innerText = "Erro de conexão com o Python.";
+                document.getElementById('statusTexto').innerText = "Erro de conexão com o motor na nuvem.";
                 document.getElementById('statusTexto').style.color = "#ff3333";
                 document.getElementById('spinner').style.display = "none";
             } finally { document.getElementById('btnGerar').disabled = false; }
@@ -367,7 +364,8 @@
 
         document.getElementById('btnLimpar').addEventListener('click', async () => {
             try {
-                await fetch("http://127.0.0.1:8000/limpar-servidor", { method: "POST" });
+                // --- AJUSTADO PARA A NUVEM (Comunicação Relativa) ---
+                await fetch("/limpar-servidor", { method: "POST" });
                 document.getElementById('galeriaVideos').innerHTML = '';
                 document.getElementById('listaProjetos').innerHTML = '<li style="opacity: 0.3; background: transparent; border: none; cursor: default; box-shadow: none;" id="empty-state">Nenhuma criação ainda.</li>';
                 contadorProjetos = 1;
