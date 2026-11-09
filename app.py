@@ -28,7 +28,6 @@ PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 app.mount("/cortes", StaticFiles(directory=PASTA_CORTES), name="cortes")
 
-# --- ROTA QUE LIGA O VISUAL (FRONT-END) AO MOTOR ---
 @app.get("/")
 async def ler_index():
     return FileResponse("index.html")
@@ -99,13 +98,13 @@ async def gerar_cortes(dados: dict):
     try:
         print(f"1. Baixando vídeo: {url}")
         
-        # --- IGNIÇÃO DO YT-DLP COM O CRACHÁ DE ACESSO (COOKIES) ---
+        # --- A MÁGICA ACONTECE AQUI: ADICIONAMOS O CRACHÁ ---
         ydl_opts = {
             'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
             'outtmpl': 'video_original.%(ext)s',
-            'cookiefile': 'cookies.txt', 
+            'cookiefile': 'cookies.txt',
         }
-        # ----------------------------------------------------------
+        # ----------------------------------------------------
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -179,7 +178,6 @@ async def gerar_cortes(dados: dict):
             
             score_viral = random.randint(65, 99)
             
-            # --- URL RELATIVA PARA FUNCIONAR NA NUVEM ---
             arquivos_gerados.append({
                 "url": f"/cortes/{nome_base}",
                 "score": score_viral
@@ -193,8 +191,7 @@ async def gerar_cortes(dados: dict):
         
     except Exception as e:
         print(f"ERRO ENCONTRADO: {e}")
-        # Retorna o erro exato para o site, ajudando a debugar se o YouTube bloquear
-        return {"erro": str(e)}
+        return {"erro": "Ocorreu um erro no motor. Olhe o terminal para detalhes."}
 
 if __name__ == "__main__":
     import uvicorn
