@@ -8,7 +8,7 @@ if not hasattr(PIL.Image, 'ANTIALIAS'):
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse # <--- ADICIONADO PARA MOSTRAR O SITE
+from fastapi.responses import FileResponse
 import yt_dlp
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 import os
@@ -28,11 +28,9 @@ PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 app.mount("/cortes", StaticFiles(directory=PASTA_CORTES), name="cortes")
 
-# --- ROTA PRINCIPAL: CARREGAR A PÁGINA INICIAL ---
 @app.get("/")
 async def ler_index():
     return FileResponse("index.html")
-# -------------------------------------------------
 
 def limpar_pasta_cortes():
     for arquivo in os.listdir(PASTA_CORTES):
@@ -48,7 +46,6 @@ async def limpar_servidor():
     limpar_pasta_cortes()
     return {"mensagem": "Servidor limpo com sucesso!"}
 
-# --- FÁBRICA DE TEXTO TRANSPARENTE ---
 def criar_imagem_texto(texto, largura, altura, indice):
     img = PIL.Image.new('RGBA', (largura, altura), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
@@ -92,7 +89,6 @@ async def gerar_cortes(dados: dict):
     url = dados.get("url")
     formato_escolhido = dados.get("formato", "original")
     tempo_corte = int(dados.get("tempo", 60))
-    
     texto_personalizado = dados.get("textoCustomizado", "")
     usar_numeracao = dados.get("autoNumeracao", False)
     
@@ -101,10 +97,14 @@ async def gerar_cortes(dados: dict):
     
     try:
         print(f"1. Baixando vídeo: {url}")
+        
+        # --- A MÁGICA ACONTECE AQUI: ADICIONAMOS O CRACHÁ ---
         ydl_opts = {
             'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
             'outtmpl': 'video_original.%(ext)s',
+            'cookiefile': 'cookies.txt',
         }
+        # ----------------------------------------------------
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -178,7 +178,6 @@ async def gerar_cortes(dados: dict):
             
             score_viral = random.randint(65, 99)
             
-            # --- AJUSTADO PARA A NUVEM (Sem 127.0.0.1) ---
             arquivos_gerados.append({
                 "url": f"/cortes/{nome_base}",
                 "score": score_viral
@@ -194,7 +193,6 @@ async def gerar_cortes(dados: dict):
         print(f"ERRO ENCONTRADO: {e}")
         return {"erro": "Ocorreu um erro no motor. Olhe o terminal para detalhes."}
 
-# --- IGNIÇÃO PARA RODAR LOCAL E NA NUVEM ---
 if __name__ == "__main__":
     import uvicorn
     porta = int(os.environ.get("PORT", 8000))
