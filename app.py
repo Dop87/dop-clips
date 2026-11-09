@@ -14,6 +14,7 @@ from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 import os
 import math
 import random
+import shutil
 
 app = FastAPI()
 
@@ -28,7 +29,6 @@ PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 app.mount("/cortes", StaticFiles(directory=PASTA_CORTES), name="cortes")
 
-# --- ROTA QUE LIGA O VISUAL (FRONT-END) AO MOTOR ---
 @app.get("/")
 async def ler_index():
     return FileResponse("index.html")
@@ -99,17 +99,26 @@ async def gerar_cortes(dados: dict):
     try:
         print(f"1. Baixando vídeo: {url}")
         
-        # --- IGNIÇÃO DO YT-DLP COM O CRACHÁ DE ACESSO (COOKIES) ---
+        # Cria uma cópia descartável do crachá para o yt-dlp não estragar o original
+        cookie_usado = "cookies_temp.txt"
+        if os.path.exists("cookies.txt"):
+            shutil.copyfile("cookies.txt", cookie_usado)
+        
+        # --- CONFIGURAÇÃO BLINDADA COM NODEJS ATIVADO ---
         ydl_opts = {
-            'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+            'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
+            'merge_output_format': 'mp4',
             'outtmpl': 'video_original.%(ext)s',
-            'cookiefile': 'cookies.txt', 
+            'cookiefile': cookie_usado,
+            'js_runtimes': {'node': {}},
         }
-        # ----------------------------------------------------------
+        # ------------------------------------------------
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             nome_arquivo = ydl.prepare_filename(info)
+            if not os.path.exists(nome_arquivo):
+                nome_arquivo = "video_original.mp4"
         
         print(f"2. Iniciando os cortes de {tempo_corte} segundos...")
         video = VideoFileClip(nome_arquivo)
@@ -179,7 +188,6 @@ async def gerar_cortes(dados: dict):
             
             score_viral = random.randint(65, 99)
             
-            # --- URL RELATIVA PARA FUNCIONAR NA NUVEM ---
             arquivos_gerados.append({
                 "url": f"/cortes/{nome_base}",
                 "score": score_viral
@@ -187,13 +195,15 @@ async def gerar_cortes(dados: dict):
             
         print("3. Processamento concluído!")
         video.close()
-        os.remove(nome_arquivo)
+        if os.path.exists(nome_arquivo):
+            os.remove(nome_arquivo)
+        if os.path.exists(cookie_usado):
+            os.remove(cookie_usado)
         
         return {"mensagem": "Sucesso", "videos": arquivos_gerados}
         
     except Exception as e:
         print(f"ERRO ENCONTRADO: {e}")
-        # Retorna o erro exato para o site, ajudando a debugar se o YouTube bloquear
         return {"erro": str(e)}
 
 if __name__ == "__main__":
