@@ -7,13 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
     <style>
         :root {
-            --bg-color: #0b0c10;
-            --neon-purple: #b900ff;
-            --neon-blue: #00d2ff;
-            --panel-bg: rgba(25, 25, 35, 0.4);
-            --panel-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f0f0f5;
-            --text-muted: #8a8d9e;
+            --bg-color: #0b0c10; --neon-purple: #b900ff; --neon-blue: #00d2ff;
+            --panel-bg: rgba(25, 25, 35, 0.4); --panel-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f0f0f5; --text-muted: #8a8d9e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -25,7 +21,7 @@
             background-attachment: fixed; overflow-x: hidden; display: flex; flex-direction: column;
         }
 
-        /* Navbar Fixa no Topo */
+        /* Navbar Fixa */
         header {
             display: flex; justify-content: space-between; align-items: center; padding: 15px 40px;
             background: rgba(11, 12, 16, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--panel-border);
@@ -38,10 +34,22 @@
         nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         nav a:hover, nav a.active { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
 
-        /* Layout Principal com Sidebar */
-        .main-wrapper { display: flex; margin-top: 70px; flex: 1; }
+        /* Pages */
+        .page { display: none; padding: 40px; animation: fadeIn 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Sidebar de Projetos */
+        /* Estilos das Páginas Informativas */
+        .hero-title { font-size: 42px; font-weight: 800; margin-bottom: 15px; background: linear-gradient(90deg, #fff, var(--text-muted)); -webkit-background-clip: text; color: transparent; }
+        .hero-text { font-size: 16px; color: var(--text-muted); line-height: 1.6; margin-bottom: 30px; max-width: 800px; }
+        .highlight { color: var(--neon-purple); font-weight: bold; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .feature-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 25px; border-radius: 16px; backdrop-filter: blur(10px); transition: 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--neon-purple); box-shadow: 0 10px 30px rgba(185, 0, 255, 0.1); }
+        .feature-card h3 { font-size: 20px; margin-bottom: 10px; color: var(--neon-blue); }
+
+        /* Sidebar do App */
+        .main-wrapper { display: flex; margin-top: 70px; flex: 1; }
         .sidebar {
             width: 280px; background: rgba(15, 16, 22, 0.6); border-right: 1px solid var(--panel-border);
             padding: 25px 20px; display: flex; flex-direction: column; gap: 15px; position: fixed; height: calc(100vh - 70px);
@@ -53,66 +61,85 @@
         .project-date { color: var(--text-muted); font-size: 11px; margin-bottom: 5px; display: block; }
         .project-title { color: var(--neon-blue); font-weight: bold; }
 
-        /* Área de Conteúdo Central */
-        .content-area { margin-left: 280px; flex: 1; padding: 40px; display: flex; justify-content: center; }
+        /* Área do App Central */
+        .content-area { margin-left: 280px; flex: 1; display: flex; justify-content: center; }
         .app-container { max-width: 900px; width: 100%; }
 
-        /* Upload Area Renovada */
+        /* Área de Upload e Ajuda */
         .upload-area {
             background: linear-gradient(145deg, rgba(30, 30, 45, 0.4), rgba(20, 20, 30, 0.6));
-            border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 60px 20px; text-align: center;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); margin-bottom: 30px;
+            border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 50px 20px; text-align: center;
+            cursor: pointer; transition: all 0.3s; margin-bottom: 15px;
         }
         .upload-area:hover { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.03); transform: translateY(-3px); }
         .upload-icon { font-size: 45px; margin-bottom: 12px; opacity: 0.8; }
         .upload-text { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 5px; }
         .upload-sub { font-size: 13px; color: var(--text-muted); }
         #file-input { display: none; }
+        
+        .help-download-btn { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--neon-blue); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 30px; text-decoration: underline; background: none; border: none; padding: 10px; width: 100%; }
+        .help-download-btn:hover { color: #fff; }
 
-        /* Novo Design de Grid e Cartões */
+        /* Modal de Download */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #15161c; border: 1px solid var(--panel-border); padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; position: relative; }
+        .modal-content h3 { color: #fff; margin-bottom: 15px; font-size: 20px; }
+        .modal-content p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .btn-external { display: block; width: 100%; padding: 12px; background: rgba(0, 210, 255, 0.1); color: var(--neon-blue); text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s; border: 1px solid rgba(0, 210, 255, 0.3); margin-bottom: 15px; }
+        .btn-external:hover { background: var(--neon-blue); color: #000; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+        .close-modal:hover { color: #fff; }
+
+        /* Grid de Configurações */
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .setting-group { background: var(--panel-bg); padding: 25px; border-radius: 18px; border: 1px solid var(--panel-border); backdrop-filter: blur(10px); }
         .setting-group h3 { font-size: 16px; margin-bottom: 20px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; }
         
-        select, input[type="text"] {
-            width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
-            color: white; border-radius: 10px; margin-bottom: 20px; font-size: 14px; outline: none; transition: 0.3s;
-        }
+        select, input[type="text"] { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 10px; margin-bottom: 20px; font-size: 14px; outline: none; transition: 0.3s; }
         select:focus, input[type="text"]:focus { border-color: var(--neon-blue); background: rgba(0,0,0,0.6); }
 
-        /* Nova Lógica de Textos */
-        .text-option-card { padding: 12px; border: 1px solid var(--panel-border); border-radius: 8px; font-size: 13px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: flex-start; gap: 10px; background: rgba(0,0,0,0.2); }
-        .text-option-card input { margin-top: 3px; accent-color: var(--neon-blue); }
-        .text-option-card.active { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
-        .text-info { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
-
-        /* Radio Formats e Previews Modernos */
+        /* Previews CSS (Incluso o Original) */
         .format-label { display: block; margin-bottom: 12px; cursor: pointer; }
         .format-label input { display: none; }
         .format-card { display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid var(--panel-border); border-radius: 12px; transition: 0.2s; background: rgba(0,0,0,0.3); }
         .format-label input:checked + .format-card { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); }
         .format-text { display: flex; flex-direction: column; }
-        .format-title { font-size: 14px; font-weight: 600; color: #fff; }
-        .format-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .format-title { font-size: 13px; font-weight: 600; color: #fff; }
+        .format-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
         
         .preview-box { width: 34px; height: 48px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .prev-bordas { background: #000; flex-direction: column; }
         .prev-bordas::after { content: ''; width: 100%; height: 50%; background: linear-gradient(45deg, var(--neon-blue), #0055ff); }
         .prev-central { background: linear-gradient(45deg, var(--neon-blue), #0055ff); border-left: 2px dashed rgba(0,0,0,0.5); border-right: 2px dashed rgba(0,0,0,0.5); }
         .prev-original { width: 48px; height: 28px; background: linear-gradient(45deg, var(--neon-blue), #0055ff); }
+        .prev-ia { background: linear-gradient(45deg, var(--neon-purple), #5500aa); }
+        .prev-ia::after { content: '🎯'; font-size: 14px; animation: scanIA 2s infinite alternate ease-in-out; }
+        @keyframes scanIA { 0% { transform: translateX(-6px); } 100% { transform: translateX(6px); } }
 
+        /* Lógica de Textos */
+        .text-option-card { padding: 12px; border: 1px solid var(--panel-border); border-radius: 8px; font-size: 13px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: flex-start; gap: 10px; background: rgba(0,0,0,0.2); }
+        .text-option-card input { margin-top: 3px; accent-color: var(--neon-blue); }
+        .text-option-card.active { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
+        .text-info { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+
+        /* Caixas Premium */
+        .premium-box { margin-top: 20px; background: rgba(255, 170, 0, 0.05); border-left: 3px solid #ffaa00; padding: 12px; border-radius: 0 8px 8px 0; }
+        .premium-title { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 13px; color: #ffaa00; margin-bottom: 8px; }
+        .premium-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+        .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 5px; cursor: pointer; font-size: 13px; color: white; }
+        .checkbox-row input { width: 16px; height: 16px; margin-top: 2px; accent-color: #ffaa00; }
+
+        /* Controles Finais */
         .btn-submit { width: 100%; padding: 20px; border: none; border-radius: 14px; background: linear-gradient(90deg, #8a2be2, #4169e1); color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4); }
 
         .loader { display: none; text-align: center; margin: 60px 0; }
         .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--neon-purple); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .results-area { display: none; }
         .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .btn-novo-recorte { padding: 12px 24px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-novo-recorte:hover { background: rgba(255,255,255,0.2); }
-        
         .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
         .video-card { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 16px; padding: 15px; text-align: center; }
         .video-card video { width: 100%; border-radius: 8px; margin-bottom: 15px; background: #000; }
@@ -129,20 +156,61 @@
             <span style="font-weight: 800; font-size: 18px;">Clips</span>
         </div>
         <nav>
-            <a href="#" class="active">Área de Corte ✂️</a>
-            <a href="#">Quem Somos</a>
+            <a onclick="showPage('page-app')" id="nav-app" class="active">Área de Corte ✂️</a>
+            <a onclick="showPage('page-home')" id="nav-home">Quem Somos</a>
+            <a onclick="showPage('page-otaku')" id="nav-otaku">Benefícios Otaku</a>
         </nav>
     </header>
 
-    <div class="main-wrapper">
+    <!-- Modal de Download -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <h3>Como baixar vídeos grátis?</h3>
+            <p>Para sua segurança, nós não inserimos anúncios suspeitos de download aqui no Dop Clips. Recomendamos que você use a ferramenta de código-aberto <strong>Cobalt.tools</strong> (100% gratuita, limpa e sem anúncios visuais).</p>
+            <ol style="margin-left: 20px; color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.6;">
+                <li>Clique no botão abaixo para abrir a ferramenta em uma nova aba.</li>
+                <li>Cole o link do vídeo desejado.</li>
+                <li>Volte ao Dop Clips e faça o upload do vídeo baixado!</li>
+            </ol>
+            <a href="https://cobalt.tools/" target="_blank" class="btn-external">🔗 Abrir site de Download Seguro</a>
+        </div>
+    </div>
+
+    <!-- PÁGINA: QUEM SOMOS -->
+    <div id="page-home" class="page main-wrapper">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 40px;">
+            <h1 class="hero-title">A Revolução dos Cortes Virais</h1>
+            <p class="hero-text">O Dop Clips nasceu para resolver o maior problema dos criadores de conteúdo: o tempo perdido em edição. Transformamos vídeos longos em dezenas de clipes dinâmicos.</p>
+            <div class="feature-grid">
+                <div class="feature-card"><h3>⚡ Velocidade Extrema</h3><p class="text-muted">Deixe nossa engine matemática processar tudo em minutos.</p></div>
+                <div class="feature-card"><h3>🎯 Formatos Otimizados</h3><p class="text-muted">Adaptações perfeitas de conteúdos horizontais sem perder detalhes.</p></div>
+                <div class="feature-card"><h3>💰 Escala e Lucro</h3><p class="text-muted">Mais cortes significam mais postagens e rentabilidade nas plataformas.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: BENEFÍCIOS OTAKU -->
+    <div id="page-otaku" class="page main-wrapper">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 40px;">
+            <h1 class="hero-title">Perfeito para <span class="highlight">Edits de Anime</span></h1>
+            <p class="hero-text">Criar AMVs, edições de lutas épicas e vídeos de curiosidades sobre mangás nunca foi tão fácil com ferramentas que respeitam a arte original da animação.</p>
+            <div class="feature-grid">
+                <div class="feature-card"><h3>📱 Formato "Vertical com Bordas"</h3><p class="text-muted">Cortes secos arruinam cenas de ação. Nosso formato com bordas mantém a cena inteira do anime visível no celular.</p></div>
+                <div class="feature-card"><h3>⚔️ Fatiamento Preciso</h3><p class="text-muted">Extraia blocos de episódios inteiros para sincronizar com suas batidas de trap posteriormente.</p></div>
+                <div class="feature-card"><h3>🎬 Preserva a Qualidade</h3><p class="text-muted">Seu corte sai com a fluidez original para a edição final.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: APP DE CORTE -->
+    <div id="page-app" class="page main-wrapper active" style="padding: 0;">
         <aside class="sidebar">
             <h3>📁 Meus Projetos</h3>
-            <div class="project-list" id="project-list">
-                <!-- Histórico injetado via JS -->
-            </div>
+            <div class="project-list" id="project-list"></div>
         </aside>
 
-        <main class="content-area">
+        <main class="content-area" style="padding: 40px;">
             <div class="app-container">
                 <form id="upload-form">
                     <div class="upload-area" id="drop-zone">
@@ -151,6 +219,8 @@
                         <div class="upload-sub" id="file-name">Ou clique para procurar (MP4, MOV até 25min)</div>
                         <input type="file" id="file-input" name="video" accept="video/mp4,video/quicktime" required>
                     </div>
+
+                    <button type="button" class="help-download-btn" onclick="openModal()">💡 Não tem o vídeo? Veja como baixar grátis sem anúncios.</button>
 
                     <div class="settings-grid">
                         <div class="setting-group">
@@ -162,13 +232,14 @@
                                 <option value="120">Fatiar a cada 2 Minutos</option>
                             </select>
                             
+                            <!-- FORMATOS RESTAURADOS -->
                             <label class="format-label">
                                 <input type="radio" name="formato" value="vertical_bordas" checked>
                                 <div class="format-card">
                                     <div class="preview-box prev-bordas"></div>
                                     <div class="format-text">
                                         <span class="format-title">Vertical com Bordas</span>
-                                        <span class="format-desc">Preserva o vídeo no centro.</span>
+                                        <span class="format-desc">Preserva o vídeo no centro. Ideal para animes.</span>
                                     </div>
                                 </div>
                             </label>
@@ -178,41 +249,61 @@
                                     <div class="preview-box prev-central"></div>
                                     <div class="format-text">
                                         <span class="format-title">Corte Central Seco</span>
-                                        <span class="format-desc">Preenche a tela toda.</span>
+                                        <span class="format-desc">Preenche a tela toda. Foco rígido no meio.</span>
                                     </div>
                                 </div>
                             </label>
+                            <label class="format-label">
+                                <input type="radio" name="formato" value="original">
+                                <div class="format-card">
+                                    <div class="preview-box prev-original"></div>
+                                    <div class="format-text">
+                                        <span class="format-title">Original (16:9)</span>
+                                        <span class="format-desc">Mantém o formato horizontal padrão do YouTube.</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- PREMIUM AI FORMAT -->
+                            <div class="premium-box" style="margin-top: 15px;">
+                                <div class="premium-title">👑 PREMIUM: Auto-Framing (IA)</div>
+                                <label class="format-label" style="margin-bottom:0;">
+                                    <input type="radio" name="formato" value="premium_ia">
+                                    <div class="format-card" style="background: rgba(185, 0, 255, 0.05); border-color: var(--neon-purple);">
+                                        <div class="preview-box prev-ia"></div>
+                                        <div class="format-text">
+                                            <span class="format-title">Rastreamento Inteligente</span>
+                                            <span class="format-desc">A IA move a câmera seguindo a ação. Sem bordas.</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="setting-group">
                             <h3>✍️ Inserção de Texto</h3>
-                            
                             <label class="text-option-card active" id="lbl-nenhum">
                                 <input type="radio" name="tipo_texto" value="nenhum" checked onchange="toggleTextForm()">
-                                <div>
-                                    <strong>Sem Texto</strong>
-                                    <span class="text-info">Vídeo limpo, apenas o corte bruto.</span>
-                                </div>
+                                <div><strong>Sem Texto</strong><span class="text-info">Vídeo limpo, apenas o corte bruto.</span></div>
                             </label>
-
                             <label class="text-option-card" id="lbl-fixo">
                                 <input type="radio" name="tipo_texto" value="fixo" onchange="toggleTextForm()">
-                                <div>
-                                    <strong>Texto Fixo (Único)</strong>
-                                    <span class="text-info">O mesmo texto em todos os vídeos. Ex: "Me siga para mais!"</span>
-                                </div>
+                                <div><strong>Texto Fixo (Único)</strong><span class="text-info">O mesmo texto em todos. Ex: "Me siga para mais!"</span></div>
                             </label>
-
                             <label class="text-option-card" id="lbl-sequencial">
                                 <input type="radio" name="tipo_texto" value="sequencial" onchange="toggleTextForm()">
-                                <div>
-                                    <strong>Numeração Automática</strong>
-                                    <span class="text-info">O site numera sozinho. Ex: Você digita "Parte", o site faz "Parte 1", "Parte 2"...</span>
-                                </div>
+                                <div><strong>Numeração Automática</strong><span class="text-info">O site numera sozinho. Ex: "Parte 1", "Parte 2"...</span></div>
                             </label>
-
                             <div id="text-input-container" style="display: none; margin-top: 15px;">
                                 <input type="text" name="texto_usuario" id="texto_usuario" placeholder="Digite seu texto aqui...">
+                            </div>
+
+                            <!-- FUNÇÕES PREMIUM DE ENGAJAMENTO -->
+                            <div class="premium-box" style="margin-top: 20px;">
+                                <div class="premium-title">👑 PREMIUM: Engajamento Extra</div>
+                                <label class="checkbox-row"><input type="checkbox" name="legendas"> Legendas Animadas Automáticas</label>
+                                <label class="checkbox-row"><input type="checkbox" name="tela_dividida"> Tela Dividida (Vídeo de Gameplay/ASMR)</label>
+                                <div class="premium-desc">Gere retenção instantânea sem precisar dominar edição complexa.</div>
                             </div>
                         </div>
                     </div>
@@ -238,25 +329,33 @@
     </div>
 
     <script>
-        // Lógica de Toggle do Texto
+        // Navegação
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Modal
+        function openModal() { document.getElementById('download-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('download-modal').style.display = 'none'; }
+
+        // Texto Toggle
         function toggleTextForm() {
             const tipo = document.querySelector('input[name="tipo_texto"]:checked').value;
             const container = document.getElementById('text-input-container');
             const input = document.getElementById('texto_usuario');
-            
             document.querySelectorAll('.text-option-card').forEach(c => c.classList.remove('active'));
             document.getElementById('lbl-' + tipo).classList.add('active');
 
-            if (tipo === 'nenhum') {
-                container.style.display = 'none'; input.value = ''; input.required = false;
-            } else if (tipo === 'fixo') {
-                container.style.display = 'block'; input.placeholder = 'Ex: Se inscreva no canal'; input.required = true;
-            } else if (tipo === 'sequencial') {
-                container.style.display = 'block'; input.placeholder = 'Ex: Parte (O site adicionará os números)'; input.required = true;
-            }
+            if (tipo === 'nenhum') { container.style.display = 'none'; input.value = ''; input.required = false; }
+            else if (tipo === 'fixo') { container.style.display = 'block'; input.placeholder = 'Ex: Se inscreva no canal'; input.required = true; }
+            else if (tipo === 'sequencial') { container.style.display = 'block'; input.placeholder = 'Ex: Parte (O site colocará o número)'; input.required = true; }
         }
 
-        // Lógica de Upload Visual
+        // Upload UX
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const fileName = document.getElementById('file-name');
@@ -269,39 +368,28 @@
             if(e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; atualizarNome(); }
         });
         fileInput.addEventListener('change', atualizarNome);
+        function atualizarNome() { if(fileInput.files.length) { fileName.innerHTML = `<span style="color: var(--neon-blue); font-weight:bold;">${fileInput.files[0].name}</span>`; } }
 
-        function atualizarNome() {
-            if(fileInput.files.length) { fileName.innerHTML = `<span style="color: var(--neon-blue); font-weight:bold;">${fileInput.files[0].name}</span>`; }
-        }
-
-        // Lógica do Histórico (LocalStorage)
+        // Histórico
         function carregarHistorico() {
             const projetos = JSON.parse(localStorage.getItem('dop_projetos') || '[]');
             const list = document.getElementById('project-list');
             list.innerHTML = projetos.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 20px 0;">Nenhum projeto salvo.</div>' : '';
-            
             projetos.forEach((proj, index) => {
-                list.innerHTML += `
-                    <div class="project-card">
-                        <span class="project-date">${proj.data}</span>
-                        <div class="project-title">Projeto ${projetos.length - index}</div>
-                        <div style="color:var(--text-muted); font-size:11px; margin-top:5px;">${proj.qtd} Cortes Gerados</div>
-                    </div>
-                `;
+                list.innerHTML += `<div class="project-card"><span class="project-date">${proj.data}</span><div class="project-title">Projeto ${projetos.length - index}</div><div style="color:var(--text-muted); font-size:11px; margin-top:5px;">${proj.qtd} Cortes Gerados</div></div>`;
             });
         }
         carregarHistorico();
-
         function salvarProjeto(qtdCortes) {
             const projetos = JSON.parse(localStorage.getItem('dop_projetos') || '[]');
             const dataAtual = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             projetos.unshift({ data: dataAtual, qtd: qtdCortes });
-            if(projetos.length > 5) projetos.pop(); // Mantém só os últimos 5
+            if(projetos.length > 5) projetos.pop();
             localStorage.setItem('dop_projetos', JSON.stringify(projetos));
             carregarHistorico();
         }
 
-        // Lógica de Novo Recorte
+        // Novo Recorte
         function novoRecorte() {
             document.getElementById('results-area').style.display = 'none';
             document.getElementById('upload-form').style.display = 'block';
@@ -311,7 +399,7 @@
             window.scrollTo(0, 0);
         }
 
-        // Submissão do Formulário
+        // Envio para o Python
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!fileInput.files.length) return alert("Selecione um vídeo primeiro!");
