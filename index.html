@@ -16,49 +16,40 @@
         .dop-3d { font-size: 26px; font-weight: 900; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); -webkit-background-clip: text; color: transparent; animation: spin3D 4s linear infinite; display: inline-block; }
         @keyframes spin3D { 0% { transform: perspective(400px) rotateY(0deg); } 100% { transform: perspective(400px) rotateY(360deg); } }
         nav { display: flex; gap: 20px; }
-        nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         nav a:hover, nav a.active { background: rgba(255, 255, 255, 0.08); color: var(--text-main); box-shadow: inset 0 -2px 0 var(--neon-blue); }
 
-        /* Correção das Abas (Views) */
+        /* Abas (Views) */
         .view-section { display: none !important; animation: fadeIn 0.4s ease-out; }
         .view-section.active { display: flex !important; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ABA: INÍCIO (Landing Page) */
+        /* ABA: INÍCIO */
         #page-inicio { flex-direction: column; align-items: center; width: 100%; padding: 110px 20px 60px 20px; }
         .inicio-container { max-width: 1100px; width: 100%; display: flex; flex-direction: column; gap: 50px; }
-        
         .hero-section { text-align: center; }
         .hero-title { font-size: 48px; font-weight: 800; margin-bottom: 20px; background: linear-gradient(90deg, #fff, var(--text-muted)); -webkit-background-clip: text; color: transparent; }
         .hero-text { font-size: 18px; color: var(--text-muted); line-height: 1.6; max-width: 700px; margin: 0 auto; }
 
-        /* Painel de Atualizações */
-        .update-banner { background: rgba(185, 0, 255, 0.05); border: 1px solid var(--neon-purple); border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(185, 0, 255, 0.1); }
-        .update-banner h3 { color: #fff; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 22px; }
+        .update-banner { background: rgba(185, 0, 255, 0.05); border: 1px solid var(--neon-purple); border-radius: 16px; padding: 25px; text-align: center; }
+        .update-banner h3 { color: #fff; margin-bottom: 10px; font-size: 22px; }
         .update-banner p { color: var(--text-muted); font-size: 15px; margin-bottom: 15px; }
-        .update-tags { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .utag { background: rgba(0, 210, 255, 0.1); color: var(--neon-blue); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid rgba(0, 210, 255, 0.3); }
+        .utag { background: rgba(0, 210, 255, 0.1); color: var(--neon-blue); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid rgba(0, 210, 255, 0.3); margin: 0 5px;}
 
-        /* Diferenciais Grid */
-        .section-title { font-size: 28px; font-weight: bold; color: #fff; margin-bottom: 25px; text-align: center; }
         .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
         .feature-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 30px; border-radius: 16px; transition: 0.3s; }
-        .feature-card:hover { transform: translateY(-5px); border-color: var(--neon-blue); }
-        .feature-card h3 { font-size: 20px; margin-bottom: 15px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .feature-card h3 { font-size: 20px; margin-bottom: 15px; color: #fff; }
         .feature-card p { color: var(--text-muted); line-height: 1.6; font-size: 14.5px; }
 
-        /* Seção Otaku */
-        .otaku-section { background: linear-gradient(145deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 15, 0.9)); border: 1px solid rgba(255, 170, 0, 0.3); padding: 40px; border-radius: 24px; position: relative; overflow: hidden; }
-        .otaku-section::before { content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: radial-gradient(circle, rgba(255, 170, 0, 0.1) 0%, transparent 70%); }
-        .otaku-content { position: relative; z-index: 2; }
-        .otaku-title { font-size: 32px; color: #ffaa00; margin-bottom: 15px; font-weight: 800; display: flex; align-items: center; gap: 15px; }
-        .otaku-text { color: var(--text-main); font-size: 16px; line-height: 1.7; margin-bottom: 25px; max-width: 800px; }
+        .otaku-section { background: linear-gradient(145deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 15, 0.9)); border: 1px solid rgba(255, 170, 0, 0.3); padding: 40px; border-radius: 24px; }
+        .otaku-title { font-size: 32px; color: #ffaa00; margin-bottom: 15px; font-weight: 800; }
+        .otaku-text { color: var(--text-main); font-size: 16px; line-height: 1.7; margin-bottom: 25px; }
         .otaku-perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
         .operk { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; border-left: 3px solid #ffaa00; }
         .operk h4 { color: #fff; margin-bottom: 8px; font-size: 16px; }
         .operk p { color: var(--text-muted); font-size: 13.5px; }
 
-        /* ABA: ÁREA DE CORTE (App) */
+        /* ABA: ÁREA DE CORTE */
         #page-app { flex-direction: row; width: 100%; margin-top: 70px; height: calc(100vh - 70px); }
         .sidebar { width: 280px; background: rgba(15, 16, 22, 0.6); border-right: 1px solid var(--panel-border); padding: 25px 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .project-list { display: flex; flex-direction: column; gap: 10px; }
@@ -69,18 +60,23 @@
         .content-area { flex: 1; display: flex; justify-content: center; padding: 40px; overflow-y: auto; }
         .app-container { max-width: 900px; width: 100%; }
 
-        /* Upload e Help */
-        .upload-area { background: linear-gradient(145deg, rgba(30, 30, 45, 0.4), rgba(20, 20, 30, 0.6)); border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 50px 20px; text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
-        .upload-area:hover { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.03); transform: translateY(-3px); }
-        .upload-icon { font-size: 45px; margin-bottom: 12px; opacity: 0.8; }
-        .upload-text { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 5px; }
+        /* DUAL UPLOAD ZONES */
+        .upload-area { background: linear-gradient(145deg, rgba(30, 30, 45, 0.4), rgba(20, 20, 30, 0.6)); border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
+        .upload-area:hover { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.03); transform: translateY(-2px); }
+        
+        .upload-fundo { background: linear-gradient(145deg, rgba(255, 170, 0, 0.03), rgba(20, 20, 30, 0.6)); border: 2px dashed rgba(255, 170, 0, 0.3); border-radius: 20px; padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
+        .upload-fundo:hover { border-color: #ffaa00; background: rgba(255, 170, 0, 0.08); transform: translateY(-2px); }
+
+        .upload-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.9; }
+        .upload-text { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 5px; }
         .upload-sub { font-size: 13px; color: var(--text-muted); }
         input[type="file"] { display: none; }
+        
         .help-download-btn { display: block; text-align: center; color: var(--neon-blue); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 30px; text-decoration: underline; background: none; border: none; width: 100%; }
 
         /* Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #15161c; border: 1px solid var(--panel-border); padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; position: relative; }
+        .modal-content { background: #15161c; border: 1px solid var(--panel-border); padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; }
         .btn-external { display: block; width: 100%; padding: 12px; background: rgba(0, 210, 255, 0.1); color: var(--neon-blue); text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; margin-bottom: 15px; border: 1px solid rgba(0, 210, 255, 0.3); }
 
         /* Configurações (Área de Corte) */
@@ -116,11 +112,6 @@
         .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: white; }
         .checkbox-row input { width: 16px; height: 16px; accent-color: #ffaa00; }
 
-        /* Area Multi-Upload Retenção */
-        #fundo-upload-container { display: none; margin-top: 15px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border: 1px dashed rgba(255,170,0,0.3); }
-        #fundo-upload-container label { display: block; text-align: center; color: #ffaa00; font-size: 12px; cursor: pointer; padding: 10px; background: rgba(255,170,0,0.1); border-radius: 6px; }
-        #fundo-upload-container label:hover { background: rgba(255,170,0,0.2); }
-
         /* Botoes e Status */
         .btn-submit { width: 100%; padding: 20px; border: none; border-radius: 14px; background: linear-gradient(90deg, #8a2be2, #4169e1); color: white; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4); }
@@ -147,7 +138,6 @@
         </nav>
     </header>
 
-    <!-- Modal Download -->
     <div class="modal-overlay" id="download-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">×</button>
@@ -157,65 +147,37 @@
         </div>
     </div>
 
-    <!-- ABA 1: INÍCIO (Tudo centralizado aqui) -->
+    <!-- ABA 1: INÍCIO -->
     <div id="page-inicio" class="view-section active">
         <div class="inicio-container">
-            
             <div class="hero-section">
                 <h1 class="hero-title">Domine os Algoritmos com Inteligência</h1>
-                <p class="hero-text">Não perca mais horas no Premiere. O Dop Clips fatiará seu vídeo longo em dezenas de clipes dinâmicos, já no formato perfeito para TikTok, Reels e Shorts, escalando sua produção de conteúdo e sua rentabilidade.</p>
+                <p class="hero-text">O Dop Clips fatiará seu vídeo longo em dezenas de clipes dinâmicos, já no formato perfeito para TikTok, Reels e Shorts.</p>
             </div>
-
             <div class="update-banner">
                 <h3>🚀 NOVA ATUALIZAÇÃO: V2.0 PREMIUM NO AR</h3>
-                <p>O motor do Dop Clips acaba de ser atualizado com Inteligências Artificiais de ponta. Destrave o verdadeiro poder do engajamento viral.</p>
-                <div class="update-tags">
-                    <span class="utag">🎙️ Legendas Animadas (Whisper IA)</span>
-                    <span class="utag">🎯 Auto-Framing (OpenCV)</span>
-                    <span class="utag">🎮 Tela Dividida Dinâmica (Multi-Upload)</span>
-                </div>
+                <div class="update-tags"><span class="utag">🎙️ Legendas Animadas (Whisper IA)</span><span class="utag">🎯 Auto-Framing (OpenCV)</span><span class="utag">🎮 Tela Dividida Dinâmica (Multi-Upload)</span></div>
             </div>
-
             <div>
-                <h2 class="section-title">Por que usar o Dop Clips?</h2>
+                <h2 style="font-size: 28px; color: #fff; margin-bottom: 25px; text-align: center;">Por que usar o Dop Clips?</h2>
                 <div class="feature-grid">
-                    <div class="feature-card">
-                        <h3>⚡ Fatiamento Matemático</h3>
-                        <p>Diga adeus ao trabalho manual. Escolha o intervalo de tempo (15s a 5min) e nossa Engine corta o vídeo do início ao fim em um único lote otimizado.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>✍️ Numeração Inteligente</h3>
-                        <p>Insira textos fixos ou crie séries infinitas com nossa Numeração Automática (Parte 1, Parte 2...). O site faz a contagem e aplica no vídeo sozinho.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>🔒 Processamento Blindado</h3>
-                        <p>Proteja seu IP. Usamos sistema de Upload Direto para evitar que o YouTube bloqueie os servidores, garantindo que o site nunca caia na hora que você mais precisa.</p>
-                    </div>
+                    <div class="feature-card"><h3>⚡ Fatiamento Matemático</h3><p>Escolha o intervalo de tempo (15s a 15min) e nossa Engine corta o vídeo do início ao fim.</p></div>
+                    <div class="feature-card"><h3>✍️ Numeração Inteligente</h3><p>Crie séries infinitas com nossa Numeração Automática (Parte 1, Parte 2...).</p></div>
+                    <div class="feature-card"><h3>🔒 Processamento Blindado</h3><p>Usamos sistema de Upload Direto para evitar bloqueios do YouTube.</p></div>
                 </div>
             </div>
-
             <div class="otaku-section">
-                <div class="otaku-content">
-                    <h2 class="otaku-title">⛩️ A Ferramenta Definitiva para Otakus e Editores</h2>
-                    <p class="otaku-text">Criar AMVs (Anime Music Videos), edições de lutas épicas e conteúdo de cultura pop exige precisão visual. Ferramentas genéricas de mercado destroem animes cortando as laterais da tela. O Dop Clips foi criado para respeitar a arte da animação.</p>
-                    
-                    <div class="otaku-perks">
-                        <div class="operk">
-                            <h4>📱 Formato: Vertical com Bordas</h4>
-                            <p>Cortes secos arruinam cenas de ação. Nosso formato exclusivo preserva o anime inteiro no centro da tela do celular, sem cortar personagens laterais.</p>
-                        </div>
-                        <div class="operk">
-                            <h4>⚔️ Fatiamento Preciso para Trap</h4>
-                            <p>Extraia dezenas de blocos inteiros de um episódio sem perda de fluidez (FPS) para sincronizar perfeitamente com batidas Trap/Phonk na sua edição final.</p>
-                        </div>
-                    </div>
+                <h2 class="otaku-title">⛩️ A Ferramenta Definitiva para Otakus e Editores</h2>
+                <p class="otaku-text">O Dop Clips foi criado para respeitar a arte da animação, mantendo a cena inteira visível.</p>
+                <div class="otaku-perks">
+                    <div class="operk"><h4>📱 Formato: Vertical com Bordas</h4><p>Nosso formato exclusivo preserva o anime inteiro no centro da tela.</p></div>
+                    <div class="operk"><h4>⚔️ Fatiamento Preciso para Trap</h4><p>Extraia blocos de um episódio sem perda de fluidez (FPS) para sincronizar com suas edições.</p></div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- ABA 2: ÁREA DE CORTE (App) -->
+    <!-- ABA 2: ÁREA DE CORTE -->
     <div id="page-app" class="view-section">
         <aside class="sidebar"><h3>📁 Meus Projetos</h3><div class="project-list" id="project-list"></div></aside>
 
@@ -223,20 +185,35 @@
             <div class="app-container">
                 <form id="upload-form">
                     
+                    <!-- UPLOAD PRINCIPAL -->
                     <div class="upload-area" id="drop-zone-main">
                         <div class="upload-icon">📂</div>
                         <div class="upload-text">Arraste seu vídeo Principal aqui</div>
-                        <div class="upload-sub" id="file-name-main">Ou clique para procurar (Até 25min)</div>
+                        <div class="upload-sub" id="file-name-main">Ou clique para procurar (MP4, MOV até 25min)</div>
                         <input type="file" id="file-input-main" name="video" accept="video/mp4,video/quicktime" required>
                     </div>
+
+                    <!-- NOVO: UPLOAD DE ATENÇÃO (SECUNDÁRIO SUPER VISÍVEL) -->
+                    <div class="upload-fundo" id="drop-zone-fundo">
+                        <div class="upload-icon">🕹️</div>
+                        <div class="upload-text" style="color: #ffaa00;">Vídeos de Atenção (Opcional - Tela Dividida)</div>
+                        <div class="upload-sub" id="file-name-fundo" style="color: rgba(255, 170, 0, 0.7);">Arraste gameplays ou ASMR para reter a audiência. (Selecione vários se quiser)</div>
+                        <input type="file" id="file-input-fundo" name="fundo_videos" accept="video/mp4,video/quicktime" multiple>
+                    </div>
+
                     <button type="button" class="help-download-btn" onclick="openModal()">💡 Não tem o vídeo? Veja como baixar grátis sem anúncios.</button>
 
                     <div class="settings-grid">
                         <div class="setting-group">
                             <h3>⏱️ Fatiamento e Formato</h3>
                             <select name="duracao_corte">
-                                <option value="15">15 Segundos</option><option value="30">30 Segundos</option>
-                                <option value="60" selected>1 Minuto</option><option value="120">2 Minutos</option><option value="300">5 Minutos</option>
+                                <option value="15">15 Segundos</option>
+                                <option value="30">30 Segundos</option>
+                                <option value="60" selected>1 Minuto</option>
+                                <option value="120">2 Minutos</option>
+                                <option value="300">5 Minutos</option>
+                                <option value="600">10 Minutos</option>
+                                <option value="900">15 Minutos</option>
                             </select>
                             
                             <label class="format-label"><input type="radio" name="formato" value="vertical_bordas" checked><div class="format-card"><div class="preview-box prev-bordas"></div><div class="format-text"><span class="format-title">Vertical com Bordas</span><span class="format-desc">Preserva o vídeo no centro.</span></div></div></label>
@@ -259,13 +236,8 @@
                             <div class="premium-box" style="margin-top: 20px;">
                                 <div class="premium-title">👑 PREMIUM: Retenção Viral</div>
                                 <label class="checkbox-row"><input type="checkbox" name="legendas"> Legendas Animadas (Whisper IA)</label>
-                                <label class="checkbox-row"><input type="checkbox" name="tela_dividida" id="chk-tela-dividida" onchange="toggleFundoUpload()"> Tela Dividida 50/50 (Multi-Fundo)</label>
-                                
-                                <div id="fundo-upload-container">
-                                    <span style="color:#ffaa00; font-size:11px; margin-bottom:8px; display:block;">O site fará um rodízio automático desses vídeos nos recortes.</span>
-                                    <label>➕ Selecionar Vídeos de Fundo<input type="file" id="file-input-fundo" name="fundo_videos" accept="video/mp4,video/quicktime" multiple style="display: none;"></label>
-                                    <div id="fundo-count" style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:5px;">Nenhum selecionado</div>
-                                </div>
+                                <label class="checkbox-row"><input type="checkbox" name="tela_dividida" id="chk-tela-dividida"> Tela Dividida 50/50 (Multi-Fundo)</label>
+                                <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 5px;">*A Tela Dividida é ativada automaticamente se você adicionar um vídeo de Atenção lá em cima.</span>
                             </div>
                         </div>
                     </div>
@@ -282,19 +254,14 @@
     </div>
 
     <script>
-        // LÓGICA CORRIGIDA DE ABAS (VIEWS)
         function switchTab(viewId, element) {
-            // Esconde todas as seções e tira a classe ativa do menu
             document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
             document.querySelectorAll('nav a').forEach(nav => nav.classList.remove('active'));
-            
-            // Ativa apenas a seção e o botão clicado
             document.getElementById(viewId).classList.add('active');
             element.classList.add('active');
             window.scrollTo(0, 0);
         }
 
-        // Funções da Área de Corte
         function openModal() { document.getElementById('download-modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('download-modal').style.display = 'none'; }
         
@@ -307,18 +274,36 @@
             if (tipo === 'nenhum') { container.style.display = 'none'; input.required = false; } else { container.style.display = 'block'; input.required = true; }
         }
 
-        function toggleFundoUpload() {
-            const isChecked = document.getElementById('chk-tela-dividida').checked;
-            document.getElementById('fundo-upload-container').style.display = isChecked ? 'block' : 'none';
-        }
+        // Lógica de Upload do Vídeo Principal
+        const dropMain = document.getElementById('drop-zone-main');
+        const inputMain = document.getElementById('file-input-main');
+        dropMain.addEventListener('click', () => inputMain.click());
+        dropMain.addEventListener('dragover', (e) => { e.preventDefault(); dropMain.style.borderColor = "var(--neon-blue)"; });
+        dropMain.addEventListener('dragleave', () => dropMain.style.borderColor = "");
+        dropMain.addEventListener('drop', (e) => { e.preventDefault(); dropMain.style.borderColor = ""; if(e.dataTransfer.files.length) { inputMain.files = e.dataTransfer.files; atualizarNomeMain(); } });
+        inputMain.addEventListener('change', atualizarNomeMain);
+        function atualizarNomeMain() { if(inputMain.files.length) document.getElementById('file-name-main').innerHTML = `<span style="color:var(--neon-blue);">${inputMain.files[0].name}</span>`; }
 
-        document.getElementById('drop-zone-main').addEventListener('click', () => document.getElementById('file-input-main').click());
-        document.getElementById('file-input-main').addEventListener('change', (e) => {
-            if(e.target.files.length) document.getElementById('file-name-main').innerHTML = `<span style="color:var(--neon-blue);">${e.target.files[0].name}</span>`;
-        });
-        document.getElementById('file-input-fundo').addEventListener('change', (e) => {
-            document.getElementById('fundo-count').innerText = e.target.files.length > 0 ? `${e.target.files.length} arquivo(s) de fundo selecionado(s) ✅` : 'Nenhum selecionado';
-        });
+        // Lógica de Upload dos Vídeos de Atenção (Fundo)
+        const dropFundo = document.getElementById('drop-zone-fundo');
+        const inputFundo = document.getElementById('file-input-fundo');
+        const chkTelaDividida = document.getElementById('chk-tela-dividida');
+        
+        dropFundo.addEventListener('click', () => inputFundo.click());
+        dropFundo.addEventListener('dragover', (e) => { e.preventDefault(); dropFundo.style.borderColor = "#ffaa00"; });
+        dropFundo.addEventListener('dragleave', () => dropFundo.style.borderColor = "");
+        dropFundo.addEventListener('drop', (e) => { e.preventDefault(); dropFundo.style.borderColor = ""; if(e.dataTransfer.files.length) { inputFundo.files = e.dataTransfer.files; atualizarNomeFundo(); } });
+        inputFundo.addEventListener('change', atualizarNomeFundo);
+        
+        function atualizarNomeFundo() { 
+            if(inputFundo.files.length > 0) {
+                document.getElementById('file-name-fundo').innerHTML = `<span style="color:#ffaa00; font-weight:bold;">${inputFundo.files.length} arquivo(s) de atenção selecionado(s) ✅</span>`;
+                // MÁGICA DE UX: Marca o checkbox premium automaticamente
+                chkTelaDividida.checked = true;
+            } else {
+                chkTelaDividida.checked = false;
+            }
+        }
 
         // Histórico
         function carregarHistorico() {
@@ -333,7 +318,15 @@
             proj.unshift({ data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}), qtd: qtd });
             if(proj.length > 5) proj.pop(); localStorage.setItem('dop_projetos', JSON.stringify(proj)); carregarHistorico();
         }
-        function novoRecorte() { document.getElementById('results-area').style.display = 'none'; document.getElementById('upload-form').style.display = 'block'; document.getElementById('upload-form').reset(); toggleTextForm(); toggleFundoUpload(); window.scrollTo(0, 0); }
+        function novoRecorte() { 
+            document.getElementById('results-area').style.display = 'none'; 
+            document.getElementById('upload-form').style.display = 'block'; 
+            document.getElementById('upload-form').reset(); 
+            document.getElementById('file-name-main').innerHTML = "Ou clique para procurar (MP4, MOV até 25min)";
+            document.getElementById('file-name-fundo').innerHTML = "Arraste gameplays ou ASMR para reter a audiência. (Selecione vários se quiser)";
+            toggleTextForm(); 
+            window.scrollTo(0, 0); 
+        }
 
         // Submissão do Python
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
