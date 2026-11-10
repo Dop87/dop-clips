@@ -1,3 +1,7 @@
+import PIL.Image
+if not hasattr(PIL.Image, 'ANTIALIAS'):
+    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -50,9 +54,6 @@ async def processar_video(
         nome_arquivo = f"corte_{uuid.uuid4().hex[:6]}.mp4"
         caminho_saida = os.path.join(PASTA_CORTES, nome_arquivo)
         
-        # CORREÇÃO CRÍTICA PARA A NUVEM (RAILWAY):
-        # ultrafast e threads=1 impedem que o servidor fique sem memória (OOM Kill)
-        # logger=None impede o erro Broken Pipe causado pela barra de progresso no terminal
         trecho.write_videofile(
             caminho_saida, 
             codec="libx264", 
@@ -78,7 +79,6 @@ async def processar_video(
 
     except Exception as e:
         print(f"❌ Erro: {e}")
-        # Garante que o arquivo temporário seja apagado mesmo se der erro
         if os.path.exists(caminho_temporario):
             os.remove(caminho_temporario)
         return JSONResponse(content={"status": "erro", "mensagem": str(e)}, status_code=500)
