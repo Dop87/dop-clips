@@ -71,6 +71,7 @@ async def processar_video(request: Request):
     
     fundo_master_clip = None
     arquivos_fundo_temp = []
+    clip = None
     
     try:
         if usar_tela_dividida and len(fundo_videos) > 0:
@@ -115,7 +116,6 @@ async def processar_video(request: Request):
                 elif formato == "corte_central":
                     trecho = trecho.crop(x1=w_orig/2 - h_orig*(9/32), y1=0, x2=w_orig/2 + h_orig*(9/32), y2=h_orig).resize(height=1920, width=1080)
                 elif formato == "premium_ia":
-                    # Fallback seguro para IA se a biblioteca pesada não estiver presente
                     trecho = trecho.resize(width=1080).margin(top=400, bottom=400, color=(0,0,0))
             
             camadas.append(trecho)
@@ -140,21 +140,29 @@ async def processar_video(request: Request):
                 caminho_saida, codec="libx264", audio_codec="aac", 
                 fps=24, preset="ultrafast", threads=1, logger=None
             )
-            trecho_final.close()
+            
+            # O COMANDO QUE CAUSAVA O ERRO DE TRAVAMENTO ESTAVA AQUI E FOI REMOVIDO!
             
             cortes_finalizados.append({"url": f"/cortes_gerados/{nome_arquivo}", "score": random.randint(75, 99), "parte": numero_corte})
             
             inicio += duracao_corte
             numero_corte += 1
             
-        clip.close()
-        os.remove(cam_principal)
-        if fundo_master_clip: fundo_master_clip.close()
-        for cam in arquivos_fundo_temp: os.remove(cam)
-            
         return JSONResponse(content={"status": "sucesso", "cortes": cortes_finalizados})
 
     except Exception as e:
         print(f"❌ Erro fatal no processamento: {e}")
-        if os.path.exists(cam_principal): os.remove(cam_principal)
         return JSONResponse(content={"status": "erro", "mensagem": f"Falha interna: {str(e)}"}, status_code=500)
+        
+    finally:
+        # SISTEMA DE LIMPEZA BLINDADO: Só fecha os originais DEPOIS que todos os cortes terminarem
+        try:
+            if clip: clip.close()
+        except: pass
+        try:
+            if fundo_master_clip: fundo_master_clip.close()
+        except: pass
+        
+        if os.path.exists(cam_principal): os.remove(cam_principal)
+        for cam in arquivos_fundo_temp: 
+            if os.path.exists(cam): os.remove(cam)
