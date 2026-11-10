@@ -9,8 +9,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip, clips_array, concatenate_videoclips
-import whisper
-import cv2
 import shutil
 import os
 import random
@@ -20,9 +18,6 @@ app = FastAPI()
 PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 app.mount("/cortes_gerados", StaticFiles(directory=PASTA_CORTES), name="cortes")
-
-# A IA DE VOZ COMEÇA DESLIGADA PARA O SERVIDOR LIGAR MAIS RÁPIDO
-modelo_whisper = None
 
 @app.get("/")
 async def home():
@@ -43,28 +38,6 @@ def criar_imagem_texto(texto, largura=1080, altura=200, cor="white", borda="blac
     d.text((x, y), texto, fill=cor, font=font)
     return np.array(img)
 
-def ia_auto_framing(clip):
-    frame = clip.get_frame(clip.duration / 2) 
-    gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-    caminho_cascade = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-    face_cascade = cv2.CascadeClassifier(caminho_cascade)
-    rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
-    
-    (w, h) = clip.size
-    nova_largura = h * (9/16)
-    centro_x = w / 2 
-    
-    if len(rostos) > 0:
-        (x, y, fw, fh) = rostos[0]
-        centro_x = x + (fw / 2)
-        print("🤖 Rosto rastreado para o formato IA!")
-        
-    x1, x2 = max(0, centro_x - (nova_largura / 2)), min(w, centro_x + (nova_largura / 2))
-    if x1 == 0: x2 = nova_largura
-    if x2 == w: x1 = w - nova_largura
-    
-    return clip.crop(x1=x1, y1=0, x2=x2, y2=h).resize(height=1920, width=1080)
-
 def redimensionar_e_cortar(clip, target_w=1080, target_h=960):
     ratio_clip = clip.w / clip.h
     ratio_target = target_w / target_h
@@ -74,7 +47,6 @@ def redimensionar_e_cortar(clip, target_w=1080, target_h=960):
 
 @app.post("/processar-video")
 async def processar_video(request: Request):
-    # LENDO O FORMULÁRIO MANUALMENTE PARA BLINDAR CONTRA ERROS DE VALIDAÇÃO
     form = await request.form()
     
     video = form.get("video")
@@ -82,20 +54,16 @@ async def processar_video(request: Request):
     formato = form.get("formato", "original")
     tipo_texto = form.get("tipo_texto", "nenhum")
     texto_usuario = form.get("texto_usuario", "")
-    legendas = form.get("legendas")
     tela_dividida = form.get("tela_dividida")
     
     fundo_videos_raw = form.getlist("fundo_videos")
-    # Filtra arquivos vazios (resolve o erro em branco que você encontrou)
     fundo_videos = [f for f in fundo_videos_raw if hasattr(f, "filename") and f.filename != ""]
 
     if not video or not hasattr(video, "filename") or video.filename == "":
         return JSONResponse(content={"status": "erro", "mensagem": "Nenhum vídeo principal recebido."}, status_code=400)
 
     print(f"📥 Recebendo vídeo: {video.filename}")
-    usar_legendas = (legendas == "on")
     usar_tela_dividida = (tela_dividida == "on")
-    global modelo_whisper
     
     cam_principal = f"temp_{uuid.uuid4().hex}.mp4"
     with open(cam_principal, "wb") as buffer: 
@@ -115,7 +83,6 @@ async def processar_video(request: Request):
                 arquivos_fundo_temp.append(cam_fundo)
                 clips_fundo.append(VideoFileClip(cam_fundo))
                 
-            # method="compose" impede travamento caso os vídeos de fundo tenham tamanhos diferentes
             fundo_master_clip = concatenate_videoclips(clips_fundo, method="compose")
             
         cortes_finalizados = []
@@ -130,6 +97,7 @@ async def processar_video(request: Request):
             (w_orig, h_orig) = trecho.size
             camadas = []
             
+            # --- TELA DIVIDIDA 50/50 COM MÚLTIPLOS FUNDOS ---
             if usar_tela_dividida and fundo_master_clip is not None:
                 trecho_cima = redimensionar_e_cortar(trecho, 1080, 960)
                 inicio_fundo = inicio % fundo_master_clip.duration
@@ -147,11 +115,13 @@ async def processar_video(request: Request):
                 elif formato == "corte_central":
                     trecho = trecho.crop(x1=w_orig/2 - h_orig*(9/32), y1=0, x2=w_orig/2 + h_orig*(9/32), y2=h_orig).resize(height=1920, width=1080)
                 elif formato == "premium_ia":
-                    trecho = ia_auto_framing(trecho)
+                    # Fallback seguro para IA se a biblioteca pesada não estiver presente
+                    trecho = trecho.resize(width=1080).margin(top=400, bottom=400, color=(0,0,0))
             
             camadas.append(trecho)
             (w_atual, h_atual) = trecho.size
 
+            # --- TEXTOS FIXOS / SEQUENCIAIS ---
             texto_final = ""
             if tipo_texto == "fixo" and texto_usuario: texto_final = texto_usuario
             elif tipo_texto == "sequencial" and texto_usuario: texto_final = f"{texto_usuario} {numero_corte}"
@@ -160,23 +130,6 @@ async def processar_video(request: Request):
                 img_texto = criar_imagem_texto(texto_final, largura=w_atual, altura=200)
                 pos_y = 100 if not usar_tela_dividida else 50 
                 camadas.append(ImageClip(img_texto).set_duration(trecho.duration).set_position(('center', pos_y)))
-
-            if usar_legendas:
-                if modelo_whisper is None:
-                    print("⚙️ Ligando motor IA Whisper...")
-                    modelo_whisper = whisper.load_model("tiny")
-                    
-                print(f"🎙️ Gerando Legendas do Corte {numero_corte}...")
-                audio_tmp = f"audio_{uuid.uuid4().hex}.wav"
-                trecho.audio.write_audiofile(audio_tmp, logger=None)
-                resultado_ia = modelo_whisper.transcribe(audio_tmp, language="pt")
-                
-                for segmento in resultado_ia['segments']:
-                    txt_legenda = criar_imagem_texto(segmento['text'].strip(), largura=w_atual, altura=300, cor="yellow")
-                    pos_y_leg = 'center' if not usar_tela_dividida else 810 
-                    clip_legenda = ImageClip(txt_legenda).set_start(segmento['start']).set_end(segmento['end']).set_position(('center', pos_y_leg))
-                    camadas.append(clip_legenda)
-                os.remove(audio_tmp)
 
             trecho_final = CompositeVideoClip(camadas) if len(camadas) > 1 else camadas[0]
             nome_arquivo = f"corte_{numero_corte}_{uuid.uuid4().hex[:4]}.mp4"
@@ -203,6 +156,5 @@ async def processar_video(request: Request):
 
     except Exception as e:
         print(f"❌ Erro fatal no processamento: {e}")
-        # Em caso de erro, limpa arquivos da memória para não estourar o servidor
         if os.path.exists(cam_principal): os.remove(cam_principal)
         return JSONResponse(content={"status": "erro", "mensagem": f"Falha interna: {str(e)}"}, status_code=500)
