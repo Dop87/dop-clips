@@ -12,16 +12,12 @@ app = FastAPI()
 PASTA_CORTES = "cortes_gerados"
 os.makedirs(PASTA_CORTES, exist_ok=True)
 
-# Permite que o Front-End exiba e baixe os vídeos gerados
 app.mount("/cortes_gerados", StaticFiles(directory=PASTA_CORTES), name="cortes")
 
-# 1. ROTA PRINCIPAL: Entrega o seu site (Front-End)
 @app.get("/")
 async def home():
-    # Se o arquivo index.html estiver na mesma pasta do app.py, ele vai exibi-lo
     return FileResponse("index.html")
 
-# 2. ROTA DE PROCESSAMENTO: O Motor de Edição
 @app.post("/processar-video")
 async def processar_video(
     video: UploadFile = File(...),
@@ -40,7 +36,6 @@ async def processar_video(
         clip = VideoFileClip(caminho_temporario)
         duracao_total = clip.duration
         
-        # Teste local seguro: pegando só o começo para não travar a máquina
         inicio = 0
         fim = min(duracao_corte, duracao_total)
         trecho = clip.subclip(inicio, fim)
@@ -55,13 +50,23 @@ async def processar_video(
         nome_arquivo = f"corte_{uuid.uuid4().hex[:6]}.mp4"
         caminho_saida = os.path.join(PASTA_CORTES, nome_arquivo)
         
-        trecho.write_videofile(caminho_saida, codec="libx264", audio_codec="aac", fps=30)
+        # CORREÇÃO CRÍTICA PARA A NUVEM (RAILWAY):
+        # ultrafast e threads=1 impedem que o servidor fique sem memória (OOM Kill)
+        # logger=None impede o erro Broken Pipe causado pela barra de progresso no terminal
+        trecho.write_videofile(
+            caminho_saida, 
+            codec="libx264", 
+            audio_codec="aac", 
+            fps=30,
+            preset="ultrafast",
+            threads=1,
+            logger=None 
+        )
         
         clip.close()
         trecho.close()
         os.remove(caminho_temporario)
         
-        # A URL de devolução aponta direto para a pasta montada no FastAPI
         url_download = f"/cortes_gerados/{nome_arquivo}"
         
         cortes_finalizados.append({
@@ -73,4 +78,7 @@ async def processar_video(
 
     except Exception as e:
         print(f"❌ Erro: {e}")
+        # Garante que o arquivo temporário seja apagado mesmo se der erro
+        if os.path.exists(caminho_temporario):
+            os.remove(caminho_temporario)
         return JSONResponse(content={"status": "erro", "mensagem": str(e)}, status_code=500)
