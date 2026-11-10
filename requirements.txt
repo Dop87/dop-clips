@@ -2,4 +2,7 @@ fastapi
 uvicorn
 python-multipart
 moviepy==1.0.3
-Pillow==9.5.0
+Pillow
+openai-whisper
+opencv-python-headless
+numpy
